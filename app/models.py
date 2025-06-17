@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, constr, field_validator
-from typing import List, Literal, Optional
+from typing import List, Literal, Optional, Dict, Any
 
 class CategorizeRequest(BaseModel):
     casenumber: constr(min_length=1) = Field(..., description="Salesforce case number")
@@ -27,4 +27,8 @@ class CategorizeResponse(BaseModel):
     ai_category: Optional[str]
     references: List[str]
     priority: int
-    days: int 
+    days: int
+    informatica_update: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Response from Informatica API including status and message"
+    ) 
