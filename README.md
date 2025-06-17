@@ -10,52 +10,41 @@ A FastAPI service that categorizes supplier emails for Almosafer/Seera Group usi
 - Input validation for required fields
 - Automated testing with pytest
 
-## Setup
 
-1. Clone the repository:
+## Production Deployment
+
+### Using Docker 
+
+1. Build the Docker image:
 ```bash
-git clone <your-repo-url>
-cd FFT_SERVICE
+docker build -t fft-service .
 ```
 
-2. Create and activate a virtual environment:
+2. Run the container:
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+docker run -d \
+  -p 8000:8000 \
+  -e OPENAI_API_KEY=your_api_key \
+  -e INFORMATICA_AUTH=your_auth_token \
+  fft-service
 ```
 
-3. Install dependencies:
-```bash
-pip install -r requirements.txt
+### Environment Variables Required for Deployment
+
+- `OPENAI_API_KEY`: Your OpenAI API key
+- `INFORMATICA_API_URL`: Informatica API endpoint (defaults to production URL)
+- `INFORMATICA_AUTH`: Informatica authentication token
+- `PORT`: Server port (defaults to 8000)
+- `HOST`: Server host (defaults to 0.0.0.0)
+
+### Health Check
+
+The service provides a health check endpoint at `/health` that returns:
+```json
+{
+    "status": "OK"
+}
 ```
-
-4. Set up environment variables:
-   - Copy `env.example` to `.env`
-   - Update `.env` with your OpenAI API key and other configurations
-
-## Running the Service
-
-Start the server:
-```bash
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
-
-The API will be available at:
-- API documentation: http://localhost:8000/docs
-- Categorization endpoint: http://localhost:8000/categorize
-
-## Testing
-
-Run the test suite:
-```bash
-pytest
-```
-
-## Security Notes
-
-- Never commit the `.env` file or expose your API keys
-- Always use environment variables for sensitive information
-- Keep your dependencies updated for security patches
 
 ## API Usage
 
@@ -68,15 +57,27 @@ Send a POST request to `/categorize` with:
 }
 ```
 
-## Contributing
+## Response Format
 
-1. Create a feature branch
-2. Make your changes
-3. Run tests
-4. Submit a pull request
+The API returns:
+```json
+{
+    "category": "REQUIRED_INFORMATION",
+    "hotel_name": "Example Hotel",
+    "city_name": "Dubai",
+    "supplier_name": "Hotelbeds",
+    "check_in_date": "2024-03-15",
+    "check_out_date": "2024-03-20",
+    "hotel_confirmation_number": "HCN123456",
+    "agent_reference_id": "H2412311166652",
+    "references": ["H2412311166652", "HCN123456"],
+    "priority": 4,
+    "days": 30,
+    "informatica_update": {
+        "success": true,
+        "status": "Success",
+        "message": "Salesforce case is updated"
+    }
+}
+```
 
-## License
-
-[Your chosen license]
-
----
