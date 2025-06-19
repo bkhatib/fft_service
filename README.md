@@ -1,17 +1,69 @@
 # Email Categorization Service
 
-A FastAPI service that categorizes supplier emails for Almosafer/Seera Group using OpenAI's GPT-4.
+A FastAPI service that categorizes FFT emails
 
-## Features
-
-- Categorizes emails into predefined categories (STOP_SALE, PAYMENT_ISSUE, etc.)
-- Extracts key information like hotel name, dates, and reference numbers
-- Calculates priority levels and days to check-in
-- Input validation for required fields
-- Automated testing with pytest
 
 
 ## Production Deployment
+
+### AWS EC2 Deployment
+
+1. Connect to your EC2 instance:
+```bash
+ssh -i your-key.pem ec2-user@your-ec2-ip
+```
+
+2. Install Docker (if not already installed):
+```bash
+# For Amazon Linux 2
+sudo yum update -y
+sudo yum install -y docker
+sudo service docker start
+sudo usermod -a -G docker ec2-user
+# Log out and back in for group changes to take effect
+```
+
+3. Clone the repository:
+```bash
+git clone https://github.com/bkhatib/fft_service.git
+cd fft_service
+```
+
+4. Set environment variables:
+```bash
+# Add these to ~/.bashrc or create a .env file
+export OPENAI_API_KEY="your-openai-api-key"
+export INFORMATICA_AUTH="your-informatica-auth"
+```
+
+5. Run the deployment script:
+```bash
+./deploy.sh
+```
+
+The service will be available at `http://your-ec2-ip:8000`
+
+### Security Considerations for EC2
+
+1. Configure Security Group:
+   - Allow inbound traffic on port 8000 only from necessary IPs
+   - Allow SSH (port 22) only from your IP
+
+2. Use AWS Secrets Manager for API keys:
+```bash
+# Install AWS CLI
+pip install awscli
+
+# Configure AWS credentials
+aws configure
+
+# Store secrets
+aws secretsmanager create-secret --name FFTService --secret-string '{"OPENAI_API_KEY":"your-key","INFORMATICA_AUTH":"your-auth"}'
+
+# Retrieve secrets (add to deploy script)
+export OPENAI_API_KEY=$(aws secretsmanager get-secret-value --secret-id FFTService --query SecretString --output text | jq -r .OPENAI_API_KEY)
+export INFORMATICA_AUTH=$(aws secretsmanager get-secret-value --secret-id FFTService --query SecretString --output text | jq -r .INFORMATICA_AUTH)
+```
 
 ### Using Docker 
 
